@@ -1,19 +1,27 @@
 import React from 'react';
-import { View, Image, StyleSheet } from 'react-native';
+import { View, Image, StyleSheet, TouchableOpacity, Text } from 'react-native';
 
 const homeIcon = require('../assets/icons/home.png');
 const searchIcon = require('../assets/icons/search.png');
 const musicIcon = require('../assets/icons/music.png');
 const profileIcon = require('../assets/icons/user.png');
 
-export function Footer() {
+export function Footer({ navigation, screen }) {
     return (
         <View style={styles.container}>
             <View style={styles.innerBox}>
-                <Image source={homeIcon} style={styles.iconStyle} />
-                <Image source={searchIcon} style={styles.iconStyle} />
-                <Image source={musicIcon} style={styles.iconStyle} />
-                <Image source={profileIcon} style={styles.iconStyle} />
+                <TouchableOpacity style={styles.iconBox} onPress={() => navigation.navigate("Home")}>
+                    <Image source={homeIcon} style={[styles.iconStyle, screen === 'Main' ? { tintColor: 'rgba(255, 255, 255, 1)' } : {}]} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.iconBox} onPress={() => navigation.navigate('Search')}>
+                    <Image source={searchIcon} style={[styles.iconStyle, screen === 'Search' ? { tintColor: 'rgba(255, 255, 255, 1)' } : {}]} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.iconBox} onPress={() => navigation.navigate('Song')}>
+                    <Image source={musicIcon} style={[styles.iconStyle, screen === 'Song' ? { tintColor: 'rgba(255, 255, 255, 1)' } : {}]} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.iconBox} onPress={() => navigation.navigate("Profile")}>
+                    <Image source={profileIcon} style={[styles.iconStyle, screen === 'Profile' ? { tintColor: 'rgba(255, 255, 255, 1)' } : {}]} />
+                </TouchableOpacity>
             </View>
         </View>
     )
@@ -25,8 +33,8 @@ const styles = StyleSheet.create({
         width: '96%',
         position: 'absolute',
         bottom: 7,
-        // backgroundColor: 'rgba(000,000,000, 0.2)',
-        backgroundColor: 'black',
+        backgroundColor: 'rgba(255,255,255, 0.3)',
+        // backgroundColor: 'black',
         alignContent: 'center',
         alignItems: 'center',
         justifyContent: 'center',
@@ -41,8 +49,12 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around'
     },
     iconStyle: {
+        height: '100%',
+        width: '100%',
+        tintColor: 'rgba(255, 255, 255, 0.5)',
+    },
+    iconBox: {
         height: 30,
         width: 30,
-        tintColor: '#fff',
     }
 })
