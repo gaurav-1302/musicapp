@@ -1,0 +1,29 @@
+
+const [searchQuery, setSearchQuery] = useState('');
+const [filteredItems, setFilteredItems] = useState(items);
+
+const handleSearch = (query) => {
+  setSearchQuery(query);
+  const filtered = items.filter((item) =>
+    item.itemName.toLowerCase().includes(query.toLowerCase())
+  );
+  setFilteredItems(filtered);
+};
+
+<View style={styles.foodCardsBox}>
+  {filteredItems.map((item, index) => {
+    // Render food cards
+  })}
+</View>
+
+<TextInput
+  style={styles.searchInput}
+  value={searchQuery}
+  onChangeText={handleSearch}
+  placeholder="Search for food items"
+/>
+
+const cityRef = db.collection('cities').doc('DC');
+
+// Set the 'capital' field of the city
+const res = await cityRef.update({capital: true});

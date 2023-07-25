@@ -1,18 +1,57 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator } from 'react-native'
 import { Footer } from '../Components/Footer'
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-
+import db from '../firebaseConfig'
+import { doc, getDoc } from "firebase/firestore";
+import { Audio } from "expo-av"
 
 const backIcon = require('../assets/icons/arrow2.png');
-const music1 = require('../assets/images/music1.jpeg');
+const play = require('../assets/icons/play.png');
+const pause = require('../assets/icons/pause.png');
 
 SplashScreen.preventAutoHideAsync();
 
-export function Song({ navigation }) {
+export function Song({ navigation, route }) {
 
   const screen = 'Song';
+  const { musicId } = route.params;
+  const [currentMusic, setCurrentMusic] = useState({});
+
+  useEffect(() => {
+    const getMusic = async () => {
+      const docRef = doc(db, "musics", musicId);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        setCurrentMusic(docSnap.data());
+      } else {
+        console.log("No such document!");
+      }
+    };
+    getMusic();
+  }, [])
+
+  const [sound, setSound] = useState();
+
+  const [musicState, setMusicState] = useState(false);
+
+  const playSound = async () => {
+    console.log('Loading Sound');
+    const { sound } = await Audio.Sound.createAsync({
+      uri: currentMusic.musicFile
+    });
+    setSound(sound);
+    console.log('Playing Sound');
+    if (musicState === false) {
+      await sound.playAsync();
+      setMusicState(true);
+    } else {
+      await sound.pauseAsync();
+      setMusicState(false);
+    }
+  }
 
   const [fontsLoaded] = useFonts({
     'Raleway-Bold': require('../assets/fonts/Raleway-Bold.ttf'),
@@ -43,42 +82,39 @@ export function Song({ navigation }) {
         <View style={styles.shortLine}>
         </View>
 
-
         <View style={styles.bigBox}>
           <View style={styles.smallBox}>
-            <Image source={music1} style={styles.smallBoxImg} />
+            <Image source={{ uri: currentMusic.coverImg }} style={styles.smallBoxImg} />
           </View>
         </View>
 
         <Text style={styles.headText}>
-          Resistance
+          {currentMusic.music}
         </Text>
 
         <Text style={styles.subheadText}>
-          Muse
+          {currentMusic.singer}
         </Text>
 
         <View style={styles.row}>
           <TouchableOpacity>
             <Image source={backIcon} style={styles.imgIcons} />
           </TouchableOpacity>
-          <View style={styles.miniRow}>
-            <TouchableOpacity>
-              <Image source={backIcon} style={styles.imgIcons} />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Image source={backIcon} style={styles.imgIcons} />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Image source={backIcon} style={styles.imgIcons} />
-            </TouchableOpacity>
-          </View>
-          <TouchableOpacity>
-            <Image source={backIcon} style={styles.imgIcons} />
+
+          <TouchableOpacity onPress={playSound}>
+            <View style={styles.playBtn}>
+              <Image source={musicState === true ? play : pause} style={[styles.imgIcons, { tintColor: '#000' }]} />
+            </View>
           </TouchableOpacity>
+
+          <TouchableOpacity>
+            <Image source={backIcon} style={[styles.imgIcons, { transform: [{ rotate: '180deg' }] }]} />
+          </TouchableOpacity>
+
+
         </View>
 
-        <View style={[styles.row, { justifyContent: 'flex-start', gap: 15, }]}>
+        <View style={[styles.rowFull, { justifyContent: 'flex-start', gap: 15, }]}>
           <Text style={[styles.subheadText, { color: '#909090' }]}>0.24</Text>
           <Text style={[styles.subheadText, { color: '#909090' }]}>0.24</Text>
         </View>
@@ -177,6 +213,14 @@ const styles = StyleSheet.create({
   },
   row: {
     marginTop: 20,
+    width: '60%',
+    flexDirection: 'row',
+    alignContent: 'center',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  rowFull: {
+    marginTop: 20,
     width: '100%',
     flexDirection: 'row',
     alignContent: 'center',
@@ -189,5 +233,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 20,
+  },
+  playBtn: {
+    backgroundColor: '#fff',
+    height: 50,
+    width: 50,
+    borderRadius: 25,
+    alignContent: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
   }
 })

@@ -15,12 +15,10 @@ export default function App() {
     <NavigationContainer>
       <StatusBar style="auto" />
       <Stack.Navigator initialRouteName='Home'>
-
         <Stack.Screen name='Home' component={Main} options={{ headerShown: false }} />
         <Stack.Screen name='Profile' component={Profile} options={{ headerShown: false }} />
         <Stack.Screen name='Search' component={Search} options={{ headerShown: false }} />
         <Stack.Screen name='Song' component={Song} options={{ headerShown: false }} />
-
       </Stack.Navigator>
     </NavigationContainer>
   );

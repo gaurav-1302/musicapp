@@ -4,12 +4,14 @@ import { StatusBar } from 'expo-status-bar';
 import { Footer } from '../Components/Footer';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
+import db from '../firebaseConfig';
+import { collection, onSnapshot, updateDoc, doc, setDoc, getDoc } from 'firebase/firestore';
 
 const menu = require('../assets/icons/menu.png');
 const search = require('../assets/icons/search.png');
-const music1 = require('../assets/images/music1.jpeg');
 const music = require('../assets/icons/music.png');
 const like = require('../assets/icons/like.png');
+const likedIcon = require('../assets/icons/liked.png');
 const play = require('../assets/icons/play.png');
 const user = require('../assets/icons/user.png');
 
@@ -19,6 +21,32 @@ SplashScreen.preventAutoHideAsync();
 export function Main({ navigation }) {
 
     const screen = 'Main';
+
+    const [musicData, setMusicData] = useState([]);
+
+    const fetchMusic = () => {
+        onSnapshot(collection(db, 'musics'), (snapshot) => {
+            setMusicData(snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id })))
+        })
+    }
+    useEffect(() => {
+        fetchMusic();
+        console.log(musicData);
+    }, []);
+
+    const handleMusicPress = (musicId) => {
+        navigation.navigate('Song', { musicId });
+    };
+
+    const likeMusic = async (id) => {
+        const song = doc(db, "musics", id);
+        const songSnap = await getDoc(song);
+        const currentLikeStatus = songSnap.data().like;
+        await updateDoc(song, {
+            like: !currentLikeStatus,
+        });
+        fetchMusic();
+    }
 
     const [fontsLoaded] = useFonts({
         'Raleway-Bold': require('../assets/fonts/Raleway-Bold.ttf'),
@@ -77,7 +105,7 @@ export function Main({ navigation }) {
                         <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexDirection: 'row', gap: 15, height: '100%', padding: 10, }}>
 
                             <View style={styles.card}>
-                                <Image source={music1} style={styles.cardImg} />
+                                <Image source={{ uri: 'https://daily.jstor.org/wp-content/uploads/2023/01/good_times_with_bad_music_1050x700.jpg' }} style={styles.cardImg} />
                                 <TouchableOpacity style={styles.dotIcon}>
                                     <Text style={styles.dotFont}>...</Text>
                                 </TouchableOpacity>
@@ -102,7 +130,7 @@ export function Main({ navigation }) {
                             </View>
 
                             <View style={styles.card}>
-                                <Image source={music1} style={styles.cardImg} />
+                                <Image source={{ uri: 'https://daily.jstor.org/wp-content/uploads/2023/01/good_times_with_bad_music_1050x700.jpg' }} style={styles.cardImg} />
                                 <TouchableOpacity style={styles.dotIcon}>
                                     <Text style={styles.dotFont}>...</Text>
                                 </TouchableOpacity>
@@ -158,188 +186,40 @@ export function Main({ navigation }) {
                     </View>
 
                     <View style={styles.musicCards}>
-                        <View style={styles.musicCard}>
-                            <View style={styles.musicCardCont}>
-                                <Image source={music1} style={styles.musicImg} />
-                                <View style={styles.musicBoxDesc}>
-                                    <Text style={styles.musicName}>
-                                        I'm Good (Blue)
-                                    </Text>
-                                    <View style={{
-                                        flexDirection: 'row',
-                                        justifyContent: 'center',
-                                        alignContent: 'center',
-                                        alignItems: 'center',
-                                        gap: 5,
-                                    }}>
-                                        <Image source={user} style={styles.musicSinger} />
-                                        <Text style={styles.musicDesc}>
-                                            David Gueeta & Abc
-                                        </Text>
-                                    </View>
-                                </View>
-                            </View>
 
-                            <TouchableOpacity>
-                                <Image source={like} style={styles.likeBtn} />
-                            </TouchableOpacity>
-                        </View>
-                        <View style={styles.musicCard}>
-                            <View style={styles.musicCardCont}>
-                                <Image source={music1} style={styles.musicImg} />
-                                <View style={styles.musicBoxDesc}>
-                                    <Text style={styles.musicName}>
-                                        I'm Good (Blue)
-                                    </Text>
-                                    <View style={{
-                                        flexDirection: 'row',
-                                        justifyContent: 'center',
-                                        alignContent: 'center',
-                                        alignItems: 'center',
-                                        gap: 5,
-                                    }}>
-                                        <Image source={user} style={styles.musicSinger} />
-                                        <Text style={styles.musicDesc}>
-                                            David Gueeta & Abc
-                                        </Text>
+                        {
+                            musicData.map((music) => (
+                                <TouchableOpacity style={styles.musicCard} key={music.id} onPress={() => handleMusicPress(music.id)}>
+                                    <View style={styles.musicCardCont}>
+                                        <Image source={{ uri: music.coverImg }} style={styles.musicImg} />
+                                        <View style={styles.musicBoxDesc}>
+                                            <Text style={styles.musicName}>
+                                                {music.music}
+                                            </Text>
+                                            <View style={{
+                                                flexDirection: 'row',
+                                                justifyContent: 'flex-start',
+                                                alignContent: 'flex-start',
+                                                alignItems: 'flex-start',
+                                                gap: 5,
+                                                marginLeft: 0,
+                                                width: '100%',
+                                            }}>
+                                                <Image source={user} style={styles.musicSinger} />
+                                                <Text style={styles.musicDesc}>
+                                                    {music.singer}
+                                                </Text>
+                                            </View>
+                                        </View>
                                     </View>
-                                </View>
-                            </View>
 
-                            <TouchableOpacity>
-                                <Image source={like} style={styles.likeBtn} />
-                            </TouchableOpacity>
-                        </View>
-                        <View style={styles.musicCard}>
-                            <View style={styles.musicCardCont}>
-                                <Image source={music1} style={styles.musicImg} />
-                                <View style={styles.musicBoxDesc}>
-                                    <Text style={styles.musicName}>
-                                        I'm Good (Blue)
-                                    </Text>
-                                    <View style={{
-                                        flexDirection: 'row',
-                                        justifyContent: 'center',
-                                        alignContent: 'center',
-                                        alignItems: 'center',
-                                        gap: 5,
-                                    }}>
-                                        <Image source={user} style={styles.musicSinger} />
-                                        <Text style={styles.musicDesc}>
-                                            David Gueeta & Abc
-                                        </Text>
-                                    </View>
-                                </View>
-                            </View>
+                                    <TouchableOpacity onPress={() => likeMusic(music.id)}>
+                                        <Image source={music.like ? likedIcon : like} style={styles.likeBtn} />
+                                    </TouchableOpacity>
 
-                            <TouchableOpacity>
-                                <Image source={like} style={styles.likeBtn} />
-                            </TouchableOpacity>
-                        </View>
-                        <View style={styles.musicCard}>
-                            <View style={styles.musicCardCont}>
-                                <Image source={music1} style={styles.musicImg} />
-                                <View style={styles.musicBoxDesc}>
-                                    <Text style={styles.musicName}>
-                                        I'm Good (Blue)
-                                    </Text>
-                                    <View style={{
-                                        flexDirection: 'row',
-                                        justifyContent: 'center',
-                                        alignContent: 'center',
-                                        alignItems: 'center',
-                                        gap: 5,
-                                    }}>
-                                        <Image source={user} style={styles.musicSinger} />
-                                        <Text style={styles.musicDesc}>
-                                            David Gueeta & Abc
-                                        </Text>
-                                    </View>
-                                </View>
-                            </View>
-
-                            <TouchableOpacity>
-                                <Image source={like} style={styles.likeBtn} />
-                            </TouchableOpacity>
-                        </View>
-                        <View style={styles.musicCard}>
-                            <View style={styles.musicCardCont}>
-                                <Image source={music1} style={styles.musicImg} />
-                                <View style={styles.musicBoxDesc}>
-                                    <Text style={styles.musicName}>
-                                        I'm Good (Blue)
-                                    </Text>
-                                    <View style={{
-                                        flexDirection: 'row',
-                                        justifyContent: 'center',
-                                        alignContent: 'center',
-                                        alignItems: 'center',
-                                        gap: 5,
-                                    }}>
-                                        <Image source={user} style={styles.musicSinger} />
-                                        <Text style={styles.musicDesc}>
-                                            David Gueeta & Abc
-                                        </Text>
-                                    </View>
-                                </View>
-                            </View>
-
-                            <TouchableOpacity>
-                                <Image source={like} style={styles.likeBtn} />
-                            </TouchableOpacity>
-                        </View>
-                        <View style={styles.musicCard}>
-                            <View style={styles.musicCardCont}>
-                                <Image source={music1} style={styles.musicImg} />
-                                <View style={styles.musicBoxDesc}>
-                                    <Text style={styles.musicName}>
-                                        I'm Good (Blue)
-                                    </Text>
-                                    <View style={{
-                                        flexDirection: 'row',
-                                        justifyContent: 'center',
-                                        alignContent: 'center',
-                                        alignItems: 'center',
-                                        gap: 5,
-                                    }}>
-                                        <Image source={user} style={styles.musicSinger} />
-                                        <Text style={styles.musicDesc}>
-                                            David Gueeta & Abc
-                                        </Text>
-                                    </View>
-                                </View>
-                            </View>
-
-                            <TouchableOpacity>
-                                <Image source={like} style={styles.likeBtn} />
-                            </TouchableOpacity>
-                        </View>
-                        <View style={styles.musicCard}>
-                            <View style={styles.musicCardCont}>
-                                <Image source={music1} style={styles.musicImg} />
-                                <View style={styles.musicBoxDesc}>
-                                    <Text style={styles.musicName}>
-                                        I'm Good (Blue)
-                                    </Text>
-                                    <View style={{
-                                        flexDirection: 'row',
-                                        justifyContent: 'center',
-                                        alignContent: 'center',
-                                        alignItems: 'center',
-                                        gap: 5,
-                                    }}>
-                                        <Image source={user} style={styles.musicSinger} />
-                                        <Text style={styles.musicDesc}>
-                                            David Gueeta & Abc
-                                        </Text>
-                                    </View>
-                                </View>
-                            </View>
-
-                            <TouchableOpacity>
-                                <Image source={like} style={styles.likeBtn} />
-                            </TouchableOpacity>
-                        </View>
+                                </TouchableOpacity>
+                            ))
+                        }
                     </View>
                 </ScrollView>
             </View>
@@ -502,7 +382,7 @@ const styles = StyleSheet.create({
     likeBtn: {
         height: 30,
         width: 30,
-        tintColor: '#fff',
+        // tintColor: '#fff',
         resizeMode: 'contain',
         marginRight: 5,
     },

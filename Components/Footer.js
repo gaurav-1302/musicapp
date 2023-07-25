@@ -16,7 +16,7 @@ export function Footer({ navigation, screen }) {
                 <TouchableOpacity style={styles.iconBox} onPress={() => navigation.navigate('Search')}>
                     <Image source={searchIcon} style={[styles.iconStyle, screen === 'Search' ? { tintColor: 'rgba(255, 255, 255, 1)' } : {}]} />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.iconBox} onPress={() => navigation.navigate('Song')}>
+                <TouchableOpacity style={styles.iconBox}>
                     <Image source={musicIcon} style={[styles.iconStyle, screen === 'Song' ? { tintColor: 'rgba(255, 255, 255, 1)' } : {}]} />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.iconBox} onPress={() => navigation.navigate("Profile")}>
